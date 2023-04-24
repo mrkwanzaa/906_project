@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Beginner</title>
+    <meta http-equiv="pragma" content="no-cache">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://unpkg.com/jspsych@7.3.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/jspsych@7.3.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-button-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-sketchpad@1.0.3"></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'></script>
+</head>
+
+<body></body>
+
+<script>
+
+    function write_data_to_server() {
+        /*
+        This function sends a data packet to the specified URL as a POST request.
+        The specified URL is for a PHP script that writes the POST request's
+        contents (`filename` and `filedata`) to a file on the server.
+        */
+        jQuery.ajax({
+            type: 'post',
+            cache: false,
+            url: url_write_data_php, // `url_write_data_php` is a global variable
+            data: {
+                filename: output_filename, // `output_filename` is a global variable
+                filedata: jsPsych.data.get().json(),
+            },
+        });
+        console.log(`Attempted to write data to: ${output_filename}`);
+    }
+    // Initialize the jsPsych object (possibly with arguments: https://www.jspsych.org/7.3/reference/jspsych/)
+    var jsPsych = initJsPsych({
+        on_finish: function () {
+            jsPsych.data.displayData(); // Print data to screen at the end
+            jsPsych.data.get().localSave('json', 'mydata.json'); // Save data to local computer
+        },
+        show_progress_bar: true,
+    });
+
+    // Initialize a timeline (just an empty array)
+    var timeline = [];
+
+    // Add some trial objects to the timeline (like appending dictionaries to a Python list)
+    var first_page = {
+        type: jsPsychHtmlButtonResponse, // This trial will use the "html-button-response" plugin
+        stimulus: [
+            '<h2>Semantic segmentation experiment</h2>' +
+            '<p>In this experiment, you will see scrambled images of cities.</p>' +
+            '<p>Your task is to color completly over the roads, without coloring over any other parts of the scene</p>'
+        ],
+        choices: ['Begin experiment'],
+    };
+    timeline.push(first_page);
+
+    var trial_1 = {
+        type: jsPsychSketchpad,
+        prompt: '<p style="width:380px">Color over the roads using the mouse.</p>',
+        prompt_location: 'abovecanvas',
+        stroke_color: 'blue',
+        stroke_width: 8,
+        background_image: '1.jpg',
+        canvas_width: 512,
+        canvas_height: 512,
+    }
+
+    timeline.push(trial_1);
+
+    var last_page = {
+        type: jsPsychHtmlButtonResponse, // This trial will use the "html-button-response" plugin
+        stimulus: [
+            '<h2>Press the button below to end experiment.</h2>' +
+            '<p>Thank you for participating!</p>'
+        ],
+        choices: ['End experiment'],
+    };
+    timeline.push(last_page);
+
+    // Run the timeline
+    jsPsych.run(timeline);
+</script>
+
+</html>
