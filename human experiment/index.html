@@ -19,7 +19,7 @@
 
 <script>
 
-    function write_data_to_server() {
+    function write_data_to_server(url, filename, filedata) {
         /*
         This function sends a data packet to the specified URL as a POST request.
         The specified URL is for a PHP script that writes the POST request's
@@ -28,22 +28,29 @@
         jQuery.ajax({
             type: 'post',
             cache: false,
-            url: url_write_data_php, // `url_write_data_php` is a global variable
+            url,
             data: {
-                filename: output_filename, // `output_filename` is a global variable
-                filedata: jsPsych.data.get().json(),
+                filename,
+                filedata
             },
         });
-        console.log(`Attempted to write data to: ${output_filename}`);
+        console.log(`Attempted to write data to: ${filename}`);
     }
     // Initialize the jsPsych object (possibly with arguments: https://www.jspsych.org/7.3/reference/jspsych/)
     var jsPsych = initJsPsych({
         on_finish: function () {
-            jsPsych.data.displayData(); // Print data to screen at the end
-            jsPsych.data.get().localSave('json', 'mydata.json'); // Save data to local computer
+            const data_url = 'https://wjguter.scripts.mit.edu/write_data.php'
+            write_data_to_server(data_url, `data/${subject_id}.json`, jsPsych.data.get().json()) // Save data to server            
         },
         show_progress_bar: true,
     });
+
+    var subject_id = jsPsych.data.getURLVariable('subject_id');
+    console.log(`subject_id from URL: ${subject_id}`);
+    if (!subject_id) {
+        subject_id = jsPsych.randomization.randomID(10);
+        console.log(`subject_id randomly assigned: ${subject_id}`);
+    }
 
     // Initialize a timeline (just an empty array)
     var timeline = [];
@@ -60,18 +67,28 @@
     };
     timeline.push(first_page);
 
-    var trial_1 = {
+    var images = []
+    for(var i =0; i < 10; i++){
+       images.push({image: `outputs/${jsPsych.randomization.randomInt(1, 500)}.jpg`}) 
+    }
+
+    var timeline_for_trials = [{
         type: jsPsychSketchpad,
         prompt: '<p style="width:380px">Color over the roads using the mouse.</p>',
         prompt_location: 'abovecanvas',
         stroke_color: 'blue',
         stroke_width: 8,
-        background_image: '1.jpg',
+        background_image: jsPsych.timelineVariable('image'),
         canvas_width: 512,
         canvas_height: 512,
-    }
+    }]
 
-    timeline.push(trial_1);
+    var trials = {
+        timeline: timeline_for_trials,
+        timeline_variables: images,
+        randomize_order: true,
+    };
+    timeline.push(trials);
 
     var last_page = {
         type: jsPsychHtmlButtonResponse, // This trial will use the "html-button-response" plugin
