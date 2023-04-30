@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Beginner</title>
+    <title>Semantic Segmentation</title>
     <meta http-equiv="pragma" content="no-cache">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://unpkg.com/jspsych@7.3.1/css/jspsych.css" rel="stylesheet" type="text/css" />
@@ -61,20 +61,24 @@
         stimulus: [
             '<h2>Semantic segmentation experiment</h2>' +
             '<p>In this experiment, you will see scrambled images of cities.</p>' +
-            '<p>Your task is to color completly over the roads, without coloring over any other parts of the scene</p>'
+            '<p>Your task is to color completly over the requested objects, without coloring over any other parts of the scene. </p>' +
+            '<p>Sometimes there may be none of the requested objects. In this case just leave the image blank.</p>'
         ],
         choices: ['Begin experiment'],
     };
     timeline.push(first_page);
-
-    var images = []
+    const categories = ['roads', 'people', 'signs', 'sky', 'vehicles', 'buildings']
+    var options = []
     for(var i =0; i < 10; i++){
-       images.push({image: `outputs/${jsPsych.randomization.randomInt(1, 500)}.jpg`}) 
+       options.push({
+            image: `outputs/${jsPsych.randomization.randomInt(1, 500)}.jpg`,
+            prompt: `<p style="width:380px">Color over the ${categories[jsPsych.randomization.randomInt(0, categories.length - 1)]} using the mouse.</p>`
+        }) 
     }
 
     var timeline_for_trials = [{
         type: jsPsychSketchpad,
-        prompt: '<p style="width:380px">Color over the roads using the mouse.</p>',
+        prompt: jsPsych.timelineVariable('prompt'),
         prompt_location: 'abovecanvas',
         stroke_color: 'blue',
         stroke_width: 8,
@@ -85,7 +89,7 @@
 
     var trials = {
         timeline: timeline_for_trials,
-        timeline_variables: images,
+        timeline_variables: options,
         randomize_order: true,
     };
     timeline.push(trials);
@@ -96,7 +100,7 @@
             '<h2>Press the button below to end experiment.</h2>' +
             '<p>Thank you for participating!</p>'
         ],
-        choices: ['End experiment'],
+        choices: ['Complete experiment'],
     };
     timeline.push(last_page);
 
