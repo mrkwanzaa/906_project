@@ -1,3 +1,5 @@
 /archive
 /.conda
 /outputs
+/control
+/human_results

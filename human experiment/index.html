@@ -70,10 +70,18 @@
     const categories = ['roads', 'people', 'signs', 'sky', 'vehicles', 'buildings']
     var options = []
     for(var i =0; i < 10; i++){
-       options.push({
-            image: `outputs/${jsPsych.randomization.randomInt(1, 500)}.jpg`,
-            prompt: `<p style="width:380px">Color over the ${categories[jsPsych.randomization.randomInt(0, categories.length - 1)]} using the mouse.</p>`
-        }) 
+        if (i % 2 == 0){
+            options.push({
+                    image: `control/${jsPsych.randomization.randomInt(1, 500)}.jpg`,
+                    prompt: `<p style="width:380px">Color over the ${categories[jsPsych.randomization.randomInt(0, categories.length - 1)]} using the mouse.</p>`
+            }) 
+       } else {
+            options.push({
+                    image: `outputs/${jsPsych.randomization.randomInt(1, 500)}.jpg`,
+                    prompt: `<p style="width:380px">Color over the ${categories[jsPsych.randomization.randomInt(0, categories.length - 1)]} using the mouse.</p>`
+            }) 
+       }
+
     }
 
     var timeline_for_trials = [{
